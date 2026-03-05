@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Defect #{{ defect.id }} - Defect Tracker{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb mb-2">
+        <li class="breadcrumb-item"><a href="{{ url_for('project_view', project_id=defect.project_id) }}">{{ defect.project.name }}</a></li>
+        <li class="breadcrumb-item active">Defect #{{ defect.id }}</li>
+    </ol>
+</nav>
+
+<div class="row g-3">
+    <!-- Detail / Edit -->
+    <div class="col-12 col-lg-7">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h5 class="card-title mb-0">Defect #{{ defect.id }}</h5>
+                    <span class="badge fs-6 {{ 'bg-danger' if defect.status == 'Open' else 'bg-warning text-dark' if defect.status == 'In Progress' else 'bg-success' }}">
+                        {{ defect.status }}
+                    </span>
+                </div>
+
+                <form method="POST" action="{{ url_for('update_defect', defect_id=defect.id) }}">
+                    <div class="mb-3">
+                        <label class="form-label">Unit Number</label>
+                        <input type="text" class="form-control" name="unit_number" value="{{ defect.unit_number }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Trade</label>
+                        <select class="form-select" name="trade">
+                            {% for t in trades %}
+                            <option value="{{ t }}" {% if defect.trade == t %}selected{% endif %}>{{ t }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="description" rows="3">{{ defect.description }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" name="status">
+                            <option value="Open" {% if defect.status == 'Open' %}selected{% endif %}>Open</option>
+                            <option value="In Progress" {% if defect.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                            <option value="Completed" {% if defect.status == 'Completed' %}selected{% endif %}>Completed</option>
+                        </select>
+                    </div>
+                    <div class="text-muted small mb-3">
+                        Added: {{ defect.date_added.strftime('%d/%m/%Y %H:%M') }}
+                        {% if defect.date_completed %}
+                        &middot; Completed: {{ defect.date_completed.strftime('%d/%m/%Y %H:%M') }}
+                        {% endif %}
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Photos -->
+    <div class="col-12 col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Photos ({{ defect.photos | length }})</h5>
+
+                {% if defect.photos %}
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    {% for photo in defect.photos %}
+                    <a href="{{ url_for('uploaded_file', filename=photo.filename) }}" target="_blank" data-bs-toggle="modal" data-bs-target="#lightbox" data-src="{{ url_for('uploaded_file', filename=photo.filename) }}">
+                        <img src="{{ url_for('uploaded_file', filename=photo.filename) }}" class="rounded photo-thumb" alt="Defect photo">
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">No photos yet.</p>
+                {% endif %}
+
+                <form method="POST" action="{{ url_for('add_photos', defect_id=defect.id) }}" enctype="multipart/form-data">
+                    <div class="input-group">
+                        <input type="file" class="form-control form-control-sm" name="photos" multiple accept="image/*" capture="environment">
+                        <button type="submit" class="btn btn-sm btn-outline-primary"><i class="bi bi-camera"></i> Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lightbox Modal -->
+<div class="modal fade" id="lightbox" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-dark border-0">
+            <div class="modal-body p-0 text-center">
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" style="z-index:10"></button>
+                <img id="lightbox-img" src="" class="img-fluid" style="max-height:90vh">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelectorAll('[data-bs-target="#lightbox"]').forEach(function(el) {
+    el.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('lightbox-img').src = this.dataset.src;
+    });
+});
+</script>
+{% endblock %}

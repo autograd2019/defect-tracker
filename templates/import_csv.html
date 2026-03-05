@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Import CSV - {{ project.name }}{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb mb-2">
+        <li class="breadcrumb-item"><a href="{{ url_for('project_view', project_id=project.id) }}">{{ project.name }}</a></li>
+        <li class="breadcrumb-item active">Import CSV</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Import Defects from CSV</h5>
+                <p class="text-muted">Upload a CSV file with defect data. The importer looks for these columns:</p>
+                <ul class="text-muted small">
+                    <li><strong>Unit Number</strong> (or "Unit")</li>
+                    <li><strong>Responsible Trade</strong> (or "Trade")</li>
+                    <li><strong>Defect</strong> (or "Description")</li>
+                    <li><strong>Status</strong> (optional - Open / In Progress / Completed)</li>
+                </ul>
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="csv_file" class="form-label">CSV File</label>
+                        <input type="file" class="form-control" id="csv_file" name="csv_file" accept=".csv" required>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-upload"></i> Import</button>
+                        <a href="{{ url_for('project_view', project_id=project.id) }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

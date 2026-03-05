@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: defect-tracker
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    disk:
+      name: defect-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: APP_PASSWORD
+        value: defects2024
+      - key: DATA_DIR
+        value: /data

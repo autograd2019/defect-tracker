@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Defect Tracker{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Projects</h4>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newProjectModal">
+        <i class="bi bi-plus-lg"></i> New Project
+    </button>
+</div>
+
+{% if projects %}
+<div class="row g-3">
+    {% for p in projects %}
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">{{ p.name }}</h5>
+                {% if p.address %}<p class="text-muted mb-2"><i class="bi bi-geo-alt"></i> {{ p.address }}</p>{% endif %}
+                {% set total = p.defects | length %}
+                {% set open_count = p.defects | selectattr('status', 'equalto', 'Open') | list | length %}
+                {% set prog_count = p.defects | selectattr('status', 'equalto', 'In Progress') | list | length %}
+                {% set done_count = p.defects | selectattr('status', 'equalto', 'Completed') | list | length %}
+                <p class="mb-1">
+                    <span class="badge bg-secondary">{{ total }} total</span>
+                    <span class="badge bg-danger">{{ open_count }} open</span>
+                    <span class="badge bg-warning text-dark">{{ prog_count }} in progress</span>
+                    <span class="badge bg-success">{{ done_count }} completed</span>
+                </p>
+            </div>
+            <div class="card-footer bg-transparent">
+                <a href="{{ url_for('project_view', project_id=p.id) }}" class="btn btn-outline-primary btn-sm">View Register</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="text-muted">No projects yet. Create one to get started.</p>
+{% endif %}
+
+<!-- New Project Modal -->
+<div class="modal fade" id="newProjectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('create_project') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title">New Project</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Project Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Address</label>
+                        <input type="text" class="form-control" id="address" name="address">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Project</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Add Defect - {{ project.name }}{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb mb-2">
+        <li class="breadcrumb-item"><a href="{{ url_for('project_view', project_id=project.id) }}">{{ project.name }}</a></li>
+        <li class="breadcrumb-item active">Add Defect</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-3">New Defect</h5>
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="unit_number" class="form-label">Unit Number</label>
+                        <input type="text" class="form-control" id="unit_number" name="unit_number" placeholder="e.g. 1, 2, 3..." required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="trade" class="form-label">Trade</label>
+                        <select class="form-select" id="trade" name="trade" required>
+                            <option value="">Select trade...</option>
+                            {% for t in trades %}
+                            <option value="{{ t }}">{{ t }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required placeholder="Describe the defect..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="photos" class="form-label">Photos</label>
+                        <input type="file" class="form-control" id="photos" name="photos" multiple accept="image/*" capture="environment">
+                        <div class="form-text">Take a photo or select from gallery. Multiple allowed.</div>
+                    </div>
+                    <div id="photo-preview" class="d-flex flex-wrap gap-2 mb-3"></div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-plus-lg"></i> Add Defect</button>
+                        <a href="{{ url_for('project_view', project_id=project.id) }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('photos').addEventListener('change', function(e) {
+    const preview = document.getElementById('photo-preview');
+    preview.innerHTML = '';
+    for (const file of e.target.files) {
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            const img = document.createElement('img');
+            img.src = ev.target.result;
+            img.className = 'rounded';
+            img.style.width = '80px';
+            img.style.height = '80px';
+            img.style.objectFit = 'cover';
+            preview.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+{% endblock %}

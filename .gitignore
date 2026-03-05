@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+venv/
+database.db
+uploads/*
+!uploads/.gitkeep
+*.db
+siteground_ssh.txt
+passenger_wsgi.py
+.htaccess

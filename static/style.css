@@ -1,0 +1,45 @@
+/* Defect Tracker - Custom Styles */
+
+body {
+    background-color: #f5f6fa;
+}
+
+.photo-thumb {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.photo-thumb:hover {
+    opacity: 0.8;
+}
+
+/* Make the filter bar compact on mobile */
+@media (max-width: 767px) {
+    .form-label-sm {
+        font-size: 0.75rem;
+    }
+}
+
+/* Status badge sizing */
+.badge {
+    font-weight: 500;
+}
+
+/* Card hover on dashboard */
+.card.h-100:hover {
+    border-color: #0d6efd;
+    transition: border-color 0.2s;
+}
+
+/* Compact table rows */
+.table td, .table th {
+    padding: 0.5rem 0.75rem;
+}
+
+/* Breadcrumb spacing */
+.breadcrumb {
+    font-size: 0.875rem;
+}
