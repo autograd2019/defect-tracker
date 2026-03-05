@@ -22,8 +22,18 @@
 
                 <form method="POST" action="{{ url_for('update_defect', defect_id=defect.id) }}">
                     <div class="mb-3">
-                        <label class="form-label">Unit Number</label>
-                        <input type="text" class="form-control" name="unit_number" value="{{ defect.unit_number }}">
+                        <label class="form-label">Location</label>
+                        <select class="form-select" id="unit_number" name="unit_number">
+                            {% set found = false %}
+                            {% for loc in locations %}
+                            <option value="{{ loc }}" {% if defect.unit_number == loc %}selected{% set found = true %}{% endif %}>{{ loc }}</option>
+                            {% endfor %}
+                            {% if not found and defect.unit_number %}
+                            <option value="{{ defect.unit_number }}" selected>{{ defect.unit_number }}</option>
+                            {% endif %}
+                            <option value="__custom__">+ New location...</option>
+                        </select>
+                        <input type="text" class="form-control mt-2 d-none" id="custom_location" name="custom_location" placeholder="Enter new location name...">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Trade</label>
@@ -107,6 +117,19 @@
 
 {% block scripts %}
 <script>
+document.getElementById('unit_number').addEventListener('change', function() {
+    var custom = document.getElementById('custom_location');
+    if (this.value === '__custom__') {
+        custom.classList.remove('d-none');
+        custom.required = true;
+        custom.focus();
+    } else {
+        custom.classList.add('d-none');
+        custom.required = false;
+        custom.value = '';
+    }
+});
+
 document.querySelectorAll('[data-bs-target="#lightbox"]').forEach(function(el) {
     el.addEventListener('click', function(e) {
         e.preventDefault();

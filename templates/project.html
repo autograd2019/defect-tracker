@@ -6,12 +6,20 @@
         <h4 class="mb-0">{{ project.name }}</h4>
         {% if project.address %}<small class="text-muted"><i class="bi bi-geo-alt"></i> {{ project.address }}</small>{% endif %}
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex gap-2 flex-wrap">
         <a href="{{ url_for('add_defect', project_id=project.id) }}" class="btn btn-primary">
             <i class="bi bi-plus-lg"></i> Add Defect
         </a>
+        <div class="btn-group">
+            <a href="{{ url_for('export_csv', project_id=project.id, **filters) }}" class="btn btn-outline-success">
+                <i class="bi bi-filetype-csv"></i> CSV
+            </a>
+            <a href="{{ url_for('export_pdf', project_id=project.id, **filters) }}" class="btn btn-outline-danger">
+                <i class="bi bi-filetype-pdf"></i> PDF
+            </a>
+        </div>
         <a href="{{ url_for('import_csv', project_id=project.id) }}" class="btn btn-outline-secondary">
-            <i class="bi bi-upload"></i> Import CSV
+            <i class="bi bi-upload"></i> Import
         </a>
     </div>
 </div>
@@ -34,11 +42,11 @@
                 </select>
             </div>
             <div class="col-6 col-md-2">
-                <label class="form-label form-label-sm mb-0">Unit</label>
-                <select class="form-select form-select-sm" name="unit">
-                    <option value="">All Units</option>
-                    {% for u in units %}
-                    <option value="{{ u }}" {% if filters.unit == u %}selected{% endif %}>{{ u }}</option>
+                <label class="form-label form-label-sm mb-0">Location</label>
+                <select class="form-select form-select-sm" name="location">
+                    <option value="">All Locations</option>
+                    {% for u in locations %}
+                    <option value="{{ u }}" {% if filters.location == u %}selected{% endif %}>{{ u }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -76,13 +84,12 @@
         <thead class="table-light">
             <tr>
                 <th>#</th>
-                <th>Unit</th>
+                <th>Location</th>
                 <th>Trade</th>
                 <th>Description</th>
                 <th>Status</th>
                 <th>Date</th>
                 <th>By</th>
-                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -98,26 +105,16 @@
                     {% if d.photos %}<i class="bi bi-camera text-muted ms-1"></i>{% endif %}
                 </td>
                 <td>
-                    <span class="badge {{ 'bg-danger' if d.status == 'Open' else 'bg-warning text-dark' if d.status == 'In Progress' else 'bg-success' }}">
-                        {{ d.status }}
-                    </span>
+                    <form method="POST" action="{{ url_for('quick_status', defect_id=d.id) }}" class="d-inline">
+                        <select name="status" class="form-select form-select-sm status-select {{ 'status-open' if d.status == 'Open' else 'status-progress' if d.status == 'In Progress' else 'status-done' }}" onchange="this.form.submit()">
+                            <option value="Open" {% if d.status == 'Open' %}selected{% endif %}>Open</option>
+                            <option value="In Progress" {% if d.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                            <option value="Completed" {% if d.status == 'Completed' %}selected{% endif %}>Completed</option>
+                        </select>
+                    </form>
                 </td>
                 <td class="text-nowrap"><small>{{ d.date_added.strftime('%d/%m/%Y') }}</small></td>
                 <td><small>{{ d.created_by.name if d.created_by else '' }}</small></td>
-                <td>
-                    <form method="POST" action="{{ url_for('quick_status', defect_id=d.id) }}" class="d-inline">
-                        {% if d.status == 'Open' %}
-                        <input type="hidden" name="status" value="In Progress">
-                        <button class="btn btn-sm btn-outline-warning" title="Mark In Progress"><i class="bi bi-arrow-right"></i></button>
-                        {% elif d.status == 'In Progress' %}
-                        <input type="hidden" name="status" value="Completed">
-                        <button class="btn btn-sm btn-outline-success" title="Mark Completed"><i class="bi bi-check-lg"></i></button>
-                        {% else %}
-                        <input type="hidden" name="status" value="Open">
-                        <button class="btn btn-sm btn-outline-secondary" title="Reopen"><i class="bi bi-arrow-counterclockwise"></i></button>
-                        {% endif %}
-                    </form>
-                </td>
             </tr>
             {% endfor %}
         </tbody>
@@ -129,20 +126,24 @@
     {% for d in defects %}
     <div class="card mb-2">
         <div class="card-body py-2 px-3">
-            <div class="d-flex justify-content-between align-items-start">
+            <div class="d-flex justify-content-between align-items-start mb-1">
                 <div class="flex-grow-1 me-2">
                     <a href="{{ url_for('defect_detail', defect_id=d.id) }}" class="text-decoration-none fw-semibold">
                         {{ d.description[:80] }}{% if d.description|length > 80 %}...{% endif %}
                     </a>
                     {% if d.photos %}<i class="bi bi-camera text-muted ms-1"></i>{% endif %}
                     <div class="text-muted small">
-                        Unit {{ d.unit_number }} &middot; {{ d.trade }} &middot; {{ d.date_added.strftime('%d/%m/%Y') }}
+                        {{ d.unit_number }} &middot; {{ d.trade }} &middot; {{ d.date_added.strftime('%d/%m/%Y') }}
                     </div>
                 </div>
-                <span class="badge {{ 'bg-danger' if d.status == 'Open' else 'bg-warning text-dark' if d.status == 'In Progress' else 'bg-success' }} align-self-center">
-                    {{ d.status }}
-                </span>
             </div>
+            <form method="POST" action="{{ url_for('quick_status', defect_id=d.id) }}">
+                <select name="status" class="form-select form-select-sm {{ 'status-open' if d.status == 'Open' else 'status-progress' if d.status == 'In Progress' else 'status-done' }}" onchange="this.form.submit()">
+                    <option value="Open" {% if d.status == 'Open' %}selected{% endif %}>Open</option>
+                    <option value="In Progress" {% if d.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                    <option value="Completed" {% if d.status == 'Completed' %}selected{% endif %}>Completed</option>
+                </select>
+            </form>
         </div>
     </div>
     {% endfor %}

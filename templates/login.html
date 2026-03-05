@@ -17,9 +17,10 @@
                     </div>
                     <button type="submit" class="btn btn-primary btn-lg w-100">Log In</button>
                 </form>
-                <p class="text-center mt-3 mb-0">
-                    <a href="{{ url_for('register') }}">Create an account</a>
-                </p>
+                <div class="text-center mt-3 mb-0">
+                    <span class="text-muted">Don't have an account?</span><br>
+                    <a href="{{ url_for('register') }}" class="btn btn-outline-secondary mt-2 w-100">Register</a>
+                </div>
             </div>
         </div>
     </div>

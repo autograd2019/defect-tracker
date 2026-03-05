@@ -43,3 +43,29 @@ body {
 .breadcrumb {
     font-size: 0.875rem;
 }
+
+/* Status dropdown colors */
+.status-select {
+    width: 120px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.2rem 0.4rem;
+}
+
+.status-open {
+    background-color: #f8d7da;
+    border-color: #dc3545;
+    color: #842029;
+}
+
+.status-progress {
+    background-color: #fff3cd;
+    border-color: #ffc107;
+    color: #664d03;
+}
+
+.status-done {
+    background-color: #d1e7dd;
+    border-color: #198754;
+    color: #0f5132;
+}

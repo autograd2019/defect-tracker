@@ -21,11 +21,18 @@ TRADES = [
     "Plumber",
     "Cabinet Maker",
     "HVAC Technician",
+    "Glazier",
+    "Stonemason",
+    "Laborer",
     "Landscaper",
     "Cleaner",
     "Renderer",
     "Concreter",
     "Roofer",
-    "Glazier",
     "Other",
 ]
+
+LOCATIONS = (
+    [f"Unit {i}" for i in range(1, 26)]
+    + ["Driveway", "Garden", "Gatehouse", "Bin Pad", "Outside", "Common Area", "Other"]
+)

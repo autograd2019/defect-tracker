@@ -15,8 +15,15 @@
                 <h5 class="card-title mb-3">New Defect</h5>
                 <form method="POST" enctype="multipart/form-data">
                     <div class="mb-3">
-                        <label for="unit_number" class="form-label">Unit Number</label>
-                        <input type="text" class="form-control" id="unit_number" name="unit_number" placeholder="e.g. 1, 2, 3..." required>
+                        <label for="unit_number" class="form-label">Location</label>
+                        <select class="form-select" id="unit_number" name="unit_number" required>
+                            <option value="">Select location...</option>
+                            {% for loc in locations %}
+                            <option value="{{ loc }}">{{ loc }}</option>
+                            {% endfor %}
+                            <option value="__custom__">+ New location...</option>
+                        </select>
+                        <input type="text" class="form-control mt-2 d-none" id="custom_location" name="custom_location" placeholder="Enter new location name...">
                     </div>
                     <div class="mb-3">
                         <label for="trade" class="form-label">Trade</label>
@@ -50,13 +57,26 @@
 
 {% block scripts %}
 <script>
+document.getElementById('unit_number').addEventListener('change', function() {
+    var custom = document.getElementById('custom_location');
+    if (this.value === '__custom__') {
+        custom.classList.remove('d-none');
+        custom.required = true;
+        custom.focus();
+    } else {
+        custom.classList.add('d-none');
+        custom.required = false;
+        custom.value = '';
+    }
+});
+
 document.getElementById('photos').addEventListener('change', function(e) {
-    const preview = document.getElementById('photo-preview');
+    var preview = document.getElementById('photo-preview');
     preview.innerHTML = '';
-    for (const file of e.target.files) {
-        const reader = new FileReader();
+    for (var i = 0; i < e.target.files.length; i++) {
+        var reader = new FileReader();
         reader.onload = function(ev) {
-            const img = document.createElement('img');
+            var img = document.createElement('img');
             img.src = ev.target.result;
             img.className = 'rounded';
             img.style.width = '80px';
@@ -64,7 +84,7 @@ document.getElementById('photos').addEventListener('change', function(e) {
             img.style.objectFit = 'cover';
             preview.appendChild(img);
         };
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(e.target.files[i]);
     }
 });
 </script>
