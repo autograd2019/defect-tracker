@@ -8,11 +8,18 @@
                 <h3 class="text-center mb-4"><i class="bi bi-tools"></i> Defect Tracker</h3>
                 <form method="POST">
                     <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control form-control-lg" id="email" name="email" placeholder="you@pembc.com.au" autofocus required>
+                    </div>
+                    <div class="mb-3">
                         <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control form-control-lg" id="password" name="password" autofocus required>
+                        <input type="password" class="form-control form-control-lg" id="password" name="password" required>
                     </div>
                     <button type="submit" class="btn btn-primary btn-lg w-100">Log In</button>
                 </form>
+                <p class="text-center mt-3 mb-0">
+                    <a href="{{ url_for('register') }}">Create an account</a>
+                </p>
             </div>
         </div>
     </div>

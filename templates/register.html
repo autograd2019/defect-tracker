@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Register - Defect Tracker{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-11 col-sm-8 col-md-5 col-lg-4">
+        <div class="card shadow">
+            <div class="card-body p-4">
+                <h3 class="text-center mb-4"><i class="bi bi-tools"></i> Create Account</h3>
+                <p class="text-muted text-center">Only @pembc.com.au emails can register.</p>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ email }}" placeholder="you@pembc.com.au" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" minlength="6" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirm" class="form-label">Confirm Password</label>
+                        <input type="password" class="form-control" id="confirm" name="confirm" minlength="6" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg w-100">Register</button>
+                </form>
+                <p class="text-center mt-3 mb-0">
+                    Already have an account? <a href="{{ url_for('login') }}">Log in</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

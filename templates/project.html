@@ -81,6 +81,7 @@
                 <th>Description</th>
                 <th>Status</th>
                 <th>Date</th>
+                <th>By</th>
                 <th></th>
             </tr>
         </thead>
@@ -102,6 +103,7 @@
                     </span>
                 </td>
                 <td class="text-nowrap"><small>{{ d.date_added.strftime('%d/%m/%Y') }}</small></td>
+                <td><small>{{ d.created_by.name if d.created_by else '' }}</small></td>
                 <td>
                     <form method="POST" action="{{ url_for('quick_status', defect_id=d.id) }}" class="d-inline">
                         {% if d.status == 'Open' %}

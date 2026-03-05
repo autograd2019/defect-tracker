@@ -15,11 +15,12 @@ from flask import (
     send_from_directory,
     session,
     url_for,
+    g,
 )
 from werkzeug.utils import secure_filename
 
 import config
-from models import Defect, DefectPhoto, Project, db
+from models import Defect, DefectPhoto, Project, User, db
 
 app = Flask(__name__)
 app.config.from_object(config)
@@ -36,30 +37,89 @@ with app.app_context():
 # Auth
 # ---------------------------------------------------------------------------
 
+ALLOWED_DOMAIN = "pembc.com.au"
+
+
+@app.before_request
+def load_user():
+    g.user = None
+    user_id = session.get("user_id")
+    if user_id:
+        g.user = db.session.get(User, user_id)
+
+
 def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        if not session.get("authenticated"):
+        if not g.user:
             return redirect(url_for("login"))
         return f(*args, **kwargs)
     return decorated
 
 
+@app.context_processor
+def inject_user():
+    return dict(current_user=g.user)
+
+
 @app.route("/")
 def index():
-    if session.get("authenticated"):
+    if g.user:
         return redirect(url_for("dashboard"))
     return redirect(url_for("login"))
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    if g.user:
+        return redirect(url_for("dashboard"))
     if request.method == "POST":
-        if request.form.get("password") == config.APP_PASSWORD:
-            session["authenticated"] = True
+        email = request.form.get("email", "").strip().lower()
+        password = request.form.get("password", "")
+        user = User.query.filter_by(email=email).first()
+        if user and user.check_password(password):
+            session["user_id"] = user.id
             return redirect(url_for("dashboard"))
-        flash("Incorrect password.", "danger")
+        flash("Invalid email or password.", "danger")
     return render_template("login.html")
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if g.user:
+        return redirect(url_for("dashboard"))
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        email = request.form.get("email", "").strip().lower()
+        password = request.form.get("password", "")
+        confirm = request.form.get("confirm", "")
+
+        errors = []
+        if not name:
+            errors.append("Name is required.")
+        if not email or not email.endswith(f"@{ALLOWED_DOMAIN}"):
+            errors.append(f"Email must be a @{ALLOWED_DOMAIN} address.")
+        if len(password) < 6:
+            errors.append("Password must be at least 6 characters.")
+        if password != confirm:
+            errors.append("Passwords do not match.")
+        if User.query.filter_by(email=email).first():
+            errors.append("An account with this email already exists.")
+
+        if errors:
+            for e in errors:
+                flash(e, "danger")
+            return render_template("register.html", name=name, email=email)
+
+        user = User(name=name, email=email)
+        user.set_password(password)
+        db.session.add(user)
+        db.session.commit()
+        session["user_id"] = user.id
+        flash(f"Welcome, {name}!", "success")
+        return redirect(url_for("dashboard"))
+
+    return render_template("register.html", name="", email="")
 
 
 @app.route("/logout")
@@ -169,6 +229,7 @@ def add_defect(project_id):
             trade=request.form.get("trade", "").strip(),
             description=request.form.get("description", "").strip(),
             status="Open",
+            created_by_id=g.user.id,
         )
         db.session.add(defect)
         db.session.flush()  # get defect.id
@@ -213,8 +274,10 @@ def update_defect(defect_id):
     new_status = request.form.get("status", defect.status).strip()
     if new_status == "Completed" and defect.status != "Completed":
         defect.date_completed = datetime.now(timezone.utc)
+        defect.completed_by_id = g.user.id
     elif new_status != "Completed":
         defect.date_completed = None
+        defect.completed_by_id = None
     defect.status = new_status
 
     db.session.commit()
@@ -251,8 +314,10 @@ def quick_status(defect_id):
     if new_status in ("Open", "In Progress", "Completed"):
         if new_status == "Completed" and defect.status != "Completed":
             defect.date_completed = datetime.now(timezone.utc)
+            defect.completed_by_id = g.user.id
         elif new_status != "Completed":
             defect.date_completed = None
+            defect.completed_by_id = None
         defect.status = new_status
         db.session.commit()
     return redirect(request.referrer or url_for("project_view", project_id=defect.project_id))
@@ -326,6 +391,7 @@ def import_csv(project_id):
                     trade=trade,
                     description=description,
                     status=status,
+                    created_by_id=g.user.id,
                 )
                 db.session.add(defect)
                 count += 1

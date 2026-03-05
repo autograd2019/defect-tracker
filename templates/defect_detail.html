@@ -47,8 +47,14 @@
                     </div>
                     <div class="text-muted small mb-3">
                         Added: {{ defect.date_added.strftime('%d/%m/%Y %H:%M') }}
+                        {% if defect.created_by %}
+                        by <strong>{{ defect.created_by.name }}</strong>
+                        {% endif %}
                         {% if defect.date_completed %}
-                        &middot; Completed: {{ defect.date_completed.strftime('%d/%m/%Y %H:%M') }}
+                        <br>Completed: {{ defect.date_completed.strftime('%d/%m/%Y %H:%M') }}
+                        {% if defect.completed_by %}
+                        by <strong>{{ defect.completed_by.name }}</strong>
+                        {% endif %}
                         {% endif %}
                     </div>
                     <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Save Changes</button>
